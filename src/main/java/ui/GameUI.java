@@ -12,14 +12,17 @@ import java.util.Scanner;
 import java.nio.charset.StandardCharsets;
 
 
-public class GameUI {
+public class GameUI implements UIInteraction {
 	private Game game;
 	private ResourceBundle messages;
+    private Scanner scanner;
 
-	public GameUI (Game game) { this.game = game; }
+	public GameUI (Game game) {
+        this.game = game;
+        this.scanner = new Scanner(System.in, StandardCharsets.UTF_8);
+    }
 
 	public void chooseLanguage() {
-		Scanner scanner = new Scanner(System.in, StandardCharsets.UTF_8);
 		final String language  = "1. English\n2. 한국어\n";
 		final String askLanguage = "Enter the number to choose the language:";
 		final String invalidChoice = "Invalid choice. Please enter 1 or 2.";
@@ -50,7 +53,6 @@ public class GameUI {
 	}
 
 	public void chooseGame() {
-		Scanner scanner = new Scanner(System.in, StandardCharsets.UTF_8);
 		final String gameModePrompt = messages.getString("gameModePrompt");
 		final String gameModeExplodingOption =
 				messages.getString("gameModeExplodingOption");
@@ -95,7 +97,6 @@ public class GameUI {
 	}
 
 	public void chooseNumberOfPlayers() {
-		Scanner scanner = new Scanner(System.in, StandardCharsets.UTF_8);
 		final String numOfPlayersPrompt = messages.getString("numOfPlayersPrompt");
 		final String numOfPlayersTwo = messages.getString("numOfPlayersTwo");
 		final String numOfPlayersThree = messages.getString("numOfPlayersThree");
@@ -129,7 +130,6 @@ public class GameUI {
 	}
 
 	private int checkValidPlayerIndexInput() {
-		Scanner scanner = new Scanner(System.in, StandardCharsets.UTF_8);
 		final String targetedAttackPrompt = messages.getString("targetedAttackPrompt");
 		final String userPlayedCardAtIndex = messages.getString("userPlayedCardAtIndex");
 		final String playerChooseDifferent = messages.getString("playerChooseDifferent");
@@ -164,7 +164,6 @@ public class GameUI {
 
 	private void startAttackFollowUp(boolean targeted) {
 		final int normalAttack = 5;
-		Scanner scanner = new Scanner(System.in, StandardCharsets.UTF_8);
 		int tempTurn;
 		tempTurn = game.getPlayerTurn();
 		tempTurn = (tempTurn + 1) % game.getNumberOfPlayers();
@@ -268,8 +267,6 @@ public class GameUI {
 
 
 	private void playGarbageCollection() {
-		Scanner scanner = new Scanner(System.in, StandardCharsets.UTF_8);
-
 		final String garbageCollectionMessage =
 				messages.getString("garbageCollectionPlayed");
 		final String playerHandMessage = messages.getString("playerHandMessage");
@@ -426,7 +423,6 @@ public class GameUI {
 	}
 
 	private int playedCard() {
-		Scanner scanner = new Scanner(System.in, StandardCharsets.UTF_8);
 		final String promptMessage = messages.getString("playedCardPrompt");
 		final String invalidIndexMessage = messages.getString("invalidIndex");
 		final String invalidInputMessage = messages.getString("invalidNumber");
@@ -460,8 +456,6 @@ public class GameUI {
 	}
 
 	private int playSpecialCombo() {
-		Scanner scanner = new Scanner(System.in, StandardCharsets.UTF_8);
-
 		final String specialComboPrompt = messages.getString("specialComboPrompt");
 		final String specialComboDecision = messages.getString("specialComboDecision");
 		final String specialComboTwo = messages.getString("specialComboTwo");
@@ -543,8 +537,6 @@ public class GameUI {
 					System.out.println(optionYes);
 					System.out.println(optionNo);
 
-					Scanner scanner = new Scanner(System.in,
-							StandardCharsets.UTF_8);
 					String userInput = scanner.nextLine();
 					switch (userInput) {
 						case "1":
@@ -571,8 +563,6 @@ public class GameUI {
 	}
 
 	private boolean playExplodingKitten(int playerIndex) {
-		Scanner scanner = new Scanner(System.in, StandardCharsets.UTF_8);
-
 		final String explodingKittenMessage = messages.getString("explodingKittenMessage");
 		final String noDefuseCardMessage = messages.getString("noDefuseCardMessage");
 		final String youExplodedMessage = messages.getString("youExplodedMessage");
@@ -681,8 +671,6 @@ public class GameUI {
 	}
 
 	private boolean endTurn() {
-		Scanner scanner = new Scanner(System.in, StandardCharsets.UTF_8);
-
 		Card cardDrawn = game.drawCard();
 		if (checkIfNumberOfTurnsGreaterThanZero()) {
 			game.decrementNumberOfTurns();
@@ -729,7 +717,6 @@ public class GameUI {
 	}
 
 	private boolean checkIfTheyEndTurn() {
-		Scanner scanner = new Scanner(System.in, StandardCharsets.UTF_8);
 		final String endTurnPrompt = messages.getString("endTurnPrompt");
 		final String typeOptionPrompt = messages.getString("typeOptionPrompt");
 		final String endTurnConfirmed = messages.getString("endTurnConfirmed");
@@ -772,7 +759,6 @@ public class GameUI {
 
 		System.out.println(decidedToPlayCard);
 
-		Scanner scanner = new Scanner(System.in, StandardCharsets.UTF_8);
 		int playerIndex;
 
 		while (true) {
@@ -806,8 +792,6 @@ public class GameUI {
 	}
 
 	private void playSpecialComboTwoCards(CardType cardType) {
-		Scanner scanner = new Scanner(System.in, StandardCharsets.UTF_8);
-
 		final String decidedToPlayCombo = messages.getString("decidedToPlayCombo");
 		final String enterPlayerToSteal = messages.getString("enterPlayerToSteal");
 		final String enterValidPlayerIndex = messages.getString("enterValidPlayerIndex");
@@ -929,7 +913,6 @@ public class GameUI {
 
 		System.out.println(decidedToPlayMark);
 
-		Scanner scanner = new Scanner(System.in, StandardCharsets.UTF_8);
 		int playerIndex;
 		int cardIndex;
 
@@ -1034,8 +1017,6 @@ public class GameUI {
 	}
 
 	private void playSpecialComboThreeCards(CardType cardType) {
-		Scanner scanner = new Scanner(System.in, StandardCharsets.UTF_8);
-
 		final String enterValidInteger = messages.getString("enterValidInteger");
 		final String enterPlayerToSteal = messages.getString("enterPlayerToSteal");
 		final String invalidPlayerIndex = messages.getString("invalidPlayerIndex");
@@ -1128,7 +1109,6 @@ public class GameUI {
 
 		System.out.println(decidedShuffle);
 
-		Scanner scanner = new Scanner(System.in, StandardCharsets.UTF_8);
 		int numberOfShuffle;
 		final int maxNumberOfShuffles = 100;
 		while (true) {
@@ -1201,7 +1181,6 @@ public class GameUI {
 		System.out.println(orderPrompt);
 
 		int[] newOrder = new int[cardsToReveal];
-		Scanner scanner = new Scanner(System.in, StandardCharsets.UTF_8);
 
 		for (int i = 0; i < cardsToReveal; i++) {
 			final String positionRequest = MessageFormat.format(positionPrompt, i + 1);
@@ -1276,7 +1255,6 @@ public class GameUI {
 		}
 
 		card.setFacedUp();
-		Scanner scanner = new Scanner(System.in, StandardCharsets.UTF_8);
 
 		while (true) {
 			System.out.println(enterIndexMessage);
@@ -1300,7 +1278,6 @@ public class GameUI {
 			game.setPlayerNumberOfTurns();
 		}
 		printPlayerTurn();
-		Scanner scanner = new Scanner(System.in, StandardCharsets.UTF_8);
 		final String playerTurnsMessage = MessageFormat.format
 				(messages.getString("playerTurnsMessage"), game.getNumberOfTurns());
 		final String enterValidIntegerMessage = messages.getString("enterValidInteger");
@@ -1727,5 +1704,15 @@ public class GameUI {
 	private boolean checkIfGreaterThanMaxIndexDeck(int indexToInsert) {
 		return indexToInsert > game.getDeck().getDeckSize();
 	}
+
+    @Override
+    public void displayMessage(String message) {
+        System.out.println(message);
+    }
+
+    @Override
+    public int getUserInputInteger() {
+        return scanner.nextInt();
+    }
 }
 
