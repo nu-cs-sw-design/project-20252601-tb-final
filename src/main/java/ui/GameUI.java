@@ -1706,13 +1706,20 @@ public class GameUI implements UIInteraction {
 	}
 
     @Override
-    public void displayMessage(String message) {
-        System.out.println(message);
+    public void displayMessage(String messageKey, Object... args) {
+        String pattern = messages.getString(messageKey);
+        String formatted = MessageFormat.format(pattern, args);
+        System.out.println(formatted);
     }
 
     @Override
     public int getUserInputInteger() {
         return scanner.nextInt();
+    }
+
+    @Override
+    public String getUserInputToken() {
+        return scanner.next();
     }
 }
 

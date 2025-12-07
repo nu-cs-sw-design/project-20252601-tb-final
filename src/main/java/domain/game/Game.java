@@ -2,6 +2,7 @@ package domain.game;
 
 import java.util.List;
 import java.util.Random;
+import java.util.Stack;
 
 public class Game {
 	private int numberOfPlayers;
@@ -18,6 +19,7 @@ public class Game {
 	private int numberOfAttacks;
 	private int[] turnTracker;
 	private boolean attacked;
+    private Stack<CardAction> actionStack; // tracks actions for nope
 
 	private static final String PLAYER_HAND_EMPTY_EXCEPTION = "Player has no cards to steal";
 	private static final String INVALID_PLAYER_INDEX_EXCEPTION = "Invalid player index.";
@@ -51,7 +53,24 @@ public class Game {
 		this.attackCounter = 0;
 		this.numberOfAttacks = 0;
 		this.attacked = false;
+        this.actionStack = new Stack<>();
 	}
+
+    // todo: push after getting from factory
+    public void pushAction(CardAction action) {
+        this.actionStack.push(action);
+    }
+
+    public CardAction popAction() {
+        if (!actionStack.isEmpty()) {
+            return actionStack.pop();
+        }
+        return null;
+    }
+
+    public boolean hasPendingActions() {
+        return !actionStack.isEmpty();
+    }
 
 	public void swapTopAndBottom() {
 		if (checkDeckHasOneCardOrLess()) {
