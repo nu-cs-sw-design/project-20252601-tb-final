@@ -1,4 +1,8 @@
-package domain.game;
+package domain.game.cardactions;
+
+import domain.game.CardType;
+import domain.game.Game;
+import domain.game.UIInteraction;
 
 // NopeAction implements Nope card
 public class NopeAction implements CardAction {

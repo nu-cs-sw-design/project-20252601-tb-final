@@ -1,4 +1,7 @@
-package domain.game;
+package domain.game.cardactions;
+
+import domain.game.Game;
+import domain.game.UIInteraction;
 
 // ShuffleAction implements shuffle card
 public class ShuffleAction implements CardAction {
