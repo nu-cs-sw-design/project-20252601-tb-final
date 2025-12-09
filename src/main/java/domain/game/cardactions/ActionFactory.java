@@ -17,6 +17,8 @@ public class ActionFactory {
 				return new SuperSkipAction();
 			case NOPE:
 				return new NopeAction();
+			case DEFUSE:
+				return new DefuseAction();
 			default:
 				throw new IllegalArgumentException("Invalid card type");
 		}
