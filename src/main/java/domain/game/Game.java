@@ -21,7 +21,6 @@ public class Game {
 	private int numberOfAttacks;
 	private int[] turnTracker;
 	private boolean attacked;
-    private Stack<CardAction> actionStack; // tracks actions for nope
 
 	private static final String PLAYER_HAND_EMPTY_EXCEPTION = "Player has no cards to steal";
 	private static final String INVALID_PLAYER_INDEX_EXCEPTION = "Invalid player index.";
@@ -38,10 +37,10 @@ public class Game {
 	private static final String NUMBER_OF_TURNS_OUT_OF_BOUNDS_EXCEPTION =
 			"Number of turns must be between 1 and 6.";
 
-	public Game (int numberOfPlayers, GameType gameType,
-                 Deck deck, domain.game.Player[] players, Random rand,
-                 List<Integer> attackQueue,
-                 int[] turnTracker) {
+	public Game(int numberOfPlayers, GameType gameType,
+				Deck deck, domain.game.Player[] players, Random rand,
+				List<Integer> attackQueue,
+				int[] turnTracker) {
 		this.numberOfPlayers = numberOfPlayers;
 		this.gameType = gameType;
 		this.deck = deck;
@@ -55,24 +54,7 @@ public class Game {
 		this.attackCounter = 0;
 		this.numberOfAttacks = 0;
 		this.attacked = false;
-        this.actionStack = new Stack<>();
 	}
-
-    // todo: push after getting from factory
-    public void pushAction(CardAction action) {
-        this.actionStack.push(action);
-    }
-
-    public CardAction popAction() {
-        if (!actionStack.isEmpty()) {
-            return actionStack.pop();
-        }
-        return null;
-    }
-
-    public boolean hasPendingActions() {
-        return !actionStack.isEmpty();
-    }
 
 	public void swapTopAndBottom() {
 		if (checkDeckHasOneCardOrLess()) {

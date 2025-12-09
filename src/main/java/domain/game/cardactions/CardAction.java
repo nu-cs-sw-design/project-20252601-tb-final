@@ -7,5 +7,5 @@ import domain.game.UIInteraction;
 // on the game and UIInteraction objects. Actions are implemented by overriding the execute
 // method
 public interface CardAction {
-    void execute(Game game, UIInteraction ui);
+	void execute(Game game, UIInteraction ui, int playerIndex);
 }

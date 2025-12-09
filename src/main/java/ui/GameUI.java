@@ -1,6 +1,8 @@
 package ui;
 
 import domain.game.*;
+import domain.game.cardactions.ActionFactory;
+import domain.game.cardactions.CardAction;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,12 +17,14 @@ import java.nio.charset.StandardCharsets;
 public class GameUI implements UIInteraction {
 	private Game game;
 	private ResourceBundle messages;
-    private Scanner scanner;
+	private Scanner scanner;
+	private ActionFactory actionFactory;
 
-	public GameUI (Game game) {
-        this.game = game;
-        this.scanner = new Scanner(System.in, StandardCharsets.UTF_8);
-    }
+	public GameUI(Game game) {
+		this.game = game;
+		this.scanner = new Scanner(System.in, StandardCharsets.UTF_8);
+		this.actionFactory = new ActionFactory();
+	}
 
 	public void chooseLanguage() {
 		final String language  = "1. English\n2. 한국어\n";
@@ -330,7 +334,11 @@ public class GameUI implements UIInteraction {
 							i, CardType.EXPLODING_KITTEN);
 
 					player.removeCardFromHand(explodingKittenIdx);
-					if (!playExplodingKitten(i)) {
+					CardAction action = actionFactory.createAction(
+							CardType.EXPLODING_KITTEN
+					);
+					action.execute(game, this, i);
+					if (!game.checkIfPlayerDead(i)) {
 						continue;
 					}
 				}
@@ -506,16 +514,7 @@ public class GameUI implements UIInteraction {
 		}
 	}
 
-	private void playNope(int playerIndex) {
-		final String decidedToPlayNope = MessageFormat.format(
-				messages.getString("decidedToPlayNope"), playerIndex);
-		final String successfullyPlayedNope = MessageFormat.format(
-				messages.getString("successfullyPlayedNope"), playerIndex);
 
-		System.out.println(decidedToPlayNope);
-		game.removeCardFromHand(playerIndex, CardType.NOPE);
-		System.out.println(successfullyPlayedNope);
-	}
 
 	private boolean checkAllPlayersForNope(int playerIndex) {
 		for (int playerCounter = 0;
@@ -540,7 +539,11 @@ public class GameUI implements UIInteraction {
 					String userInput = scanner.nextLine();
 					switch (userInput) {
 						case "1":
-							playNope(playerCounter);
+							CardAction action =
+									actionFactory.createAction(
+										CardType.NOPE
+									);
+							action.execute(game, this, playerCounter);
 							return !checkAllPlayersForNope
 									(playerCounter);
 						case "2":
@@ -560,114 +563,6 @@ public class GameUI implements UIInteraction {
 			}
 		}
 		return false;
-	}
-
-	private boolean playExplodingKitten(int playerIndex) {
-		final String explodingKittenMessage = messages.getString("explodingKittenMessage");
-		final String noDefuseCardMessage = messages.getString("noDefuseCardMessage");
-		final String youExplodedMessage = messages.getString("youExplodedMessage");
-		final String defusedMessage = messages.getString("defusedMessage");
-		final String whereToInsertMessage = messages.getString("whereToInsertMessage");
-		final String validRangeMessage = MessageFormat.format(
-		messages.getString("validRangeMessage"), game.getDeckSize());
-		final String invalidInputMessage = messages.getString("invalidInputMessage");
-		final String cursedMessage = messages.getString("cursedExplodingMessage");
-		final String notDefuseCardMessage = messages.getString("notDefuseCardMessage");
-		final String discardCardMessage = messages.getString("discardCardMessage");
-		final String reenterDefuseMessage = messages.getString("reenterDefuseMessage");
-
-		final String anotherExplodingKittenMessage =
-				messages.getString("anotherExplodingKittenMessage");
-		final String defusedFirstExplodingKitten =
-				messages.getString("defusedFirstExplodingKitten");
-		final String discardStreakingKittenMessage =
-				messages.getString("discardStreakingKittenMessage");
-
-		System.out.println(explodingKittenMessage);
-		if (checkExplodingKitten(playerIndex)) {
-			System.out.println(noDefuseCardMessage);
-			System.out.println(youExplodedMessage);
-			return false;
-		} else {
-			Player player = game.getPlayerAtIndex(playerIndex);
-			if (player.getIsCursed()) {
-				System.out.println(cursedMessage);
-
-				while (true) {
-					final String findDefuseCardMessage = MessageFormat.format(
-							messages.getString("findDefuseCardMessage")
-							, player.getHandSize() - 1);
-					System.out.println(findDefuseCardMessage);
-					String defuseString = scanner.nextLine();
-					try {
-					int defuseIndex = Integer.parseInt(defuseString);
-					Card card = player.getCardAt(defuseIndex);
-					if (checkMatchingCardType(card.getCardType(),
-							CardType.DEFUSE)) {
-						break;
-					}
-					else if (checkMatchingCardType(card.getCardType(),
-					CardType.EXPLODING_KITTEN)) {
-						System.out.println(anotherExplodingKittenMessage);
-						player.removeCardFromHand(defuseIndex);
-						boolean exploded = playExplodingKitten(playerIndex);
-						if (!exploded) {
-							return false;
-						}
-						System.out.println(defusedFirstExplodingKitten);
-						if (!player.hasCard(CardType.DEFUSE)) {
-							System.out.println(noDefuseCardMessage);
-							System.out.println(youExplodedMessage);
-							return false;
-						}
-					} else if (checkMatchingCardType(card.getCardType(),
-						CardType.STREAKING_KITTEN)
-						&& player.hasCard(CardType.EXPLODING_KITTEN)) {
-						System.out.println(discardStreakingKittenMessage);
-						player.removeCardFromHand(defuseIndex);
-						player.removeCardFromHand(player.getIndexOfCard
-								(CardType.EXPLODING_KITTEN));
-						boolean exploded = playExplodingKitten(playerIndex);
-						if (!exploded) {
-							return false;
-						}
-						System.out.println(defusedFirstExplodingKitten);
-						if (!player.hasCard(CardType.DEFUSE)) {
-							System.out.println(noDefuseCardMessage);
-							System.out.println(youExplodedMessage);
-							return false;
-						}
-
-					} else {
-						System.out.println(notDefuseCardMessage);
-						player.removeCardFromHand(defuseIndex);
-						System.out.println(discardCardMessage);
-						System.out.println(reenterDefuseMessage);
-					}
-
-					} catch (Exception e) {
-						System.out.println(invalidInputMessage);
-					}
-				}
-			}
-
-			System.out.println(defusedMessage);
-			System.out.println(whereToInsertMessage);
-			System.out.println(validRangeMessage);
-			while (true) {
-				String userInput = scanner.nextLine();
-				try {
-					int userIndex = Integer.parseInt(userInput);
-					game.playDefuse(userIndex, playerIndex);
-					game.getPlayerAtIndex(playerIndex).setCursed(false);
-					return true;
-				} catch (NumberFormatException e) {
-					System.out.println(invalidInputMessage);
-				} catch (UnsupportedOperationException e) {
-					System.out.println(e.getMessage());
-				}
-			}
-		}
 	}
 
 	private boolean endTurn() {
@@ -704,7 +599,10 @@ public class GameUI implements UIInteraction {
 					}
 				}
 			}
-			return playExplodingKitten(currentPlayerIdx);
+
+			CardAction action = actionFactory.createAction(CardType.EXPLODING_KITTEN);
+			action.execute(game, this, currentPlayerIdx);
+			return !game.checkIfPlayerDead(currentPlayerIdx);
 		} else if (checkMatchingCardType(cardDrawn.getCardType(),
 				CardType.IMPLODING_KITTEN)) {
 			return playImplodingKitten(cardDrawn);
@@ -852,7 +750,12 @@ public class GameUI implements UIInteraction {
 						, CardType.EXPLODING_KITTEN);
 						game.getPlayerAtIndex(game.getPlayerTurn())
 						.removeCardFromHand(explodingKittenIndex);
-						playExplodingKitten(game.getPlayerTurn());
+
+						CardAction action =
+								actionFactory.createAction(
+									CardType.EXPLODING_KITTEN
+								);
+						action.execute(game, this, game.getPlayerTurn());
 						}
 					} catch (NumberFormatException e) {
 						System.out.println(invalidNumber);
@@ -864,7 +767,10 @@ public class GameUI implements UIInteraction {
 						, CardType.EXPLODING_KITTEN);
 					game.getPlayerAtIndex(game.getPlayerTurn())
 							.removeCardFromHand(explodingKittenIndex);
-					playExplodingKitten(game.getPlayerTurn());
+
+					CardAction action = actionFactory
+							.createAction(CardType.EXPLODING_KITTEN);
+					action.execute(game, this, game.getPlayerTurn());
 				}
 
 			} else if (checkMatchingCardType(stealedCard.getCardType(),
@@ -874,7 +780,11 @@ public class GameUI implements UIInteraction {
 						, CardType.EXPLODING_KITTEN);
 				game.getPlayerAtIndex(playerIndex).
 						removeCardFromHand(explodingKittenIndex);
-				playExplodingKitten(playerIndex);
+
+
+				CardAction action = actionFactory
+						.createAction(CardType.EXPLODING_KITTEN);
+				action.execute(game, this, playerIndex);
 			}
 		} catch (IllegalArgumentException e) {
 			System.out.println(playerNoCardsToSteal);
@@ -1101,49 +1011,6 @@ public class GameUI implements UIInteraction {
 		}
 	}
 
-	private void playShuffle() {
-		final String decidedShuffle = messages.getString("decidedShuffle");
-		final String enterShuffleTimes = messages.getString("enterShuffleTimes");
-		final String enterPositiveInteger = messages.getString("enterPositiveInteger");
-		final String enterInteger = messages.getString("enterInteger");
-
-		System.out.println(decidedShuffle);
-
-		int numberOfShuffle;
-		final int maxNumberOfShuffles = 100;
-		while (true) {
-			System.out.print(enterShuffleTimes);
-			try {
-				numberOfShuffle = scanner.nextInt();
-				if (numberOfShuffle > maxNumberOfShuffles) {
-					final String maxShuffleMessage =
-							messages.getString("maxShuffleMessage");
-					System.out.println(maxShuffleMessage);
-				}
-				else if (numberOfShuffle > 0) {
-					break;
-				} else {
-					System.out.println(enterPositiveInteger);
-				}
-			} catch (Exception e) {
-				System.out.println(enterInteger);
-				scanner.next();
-			}
-		}
-		game.playShuffle(numberOfShuffle);
-	}
-
-	private void playSkip(boolean superSkip) {
-		final String decidedSkip = messages.getString("decidedSkip");
-		final String turnsRemainingTemplate = messages.getString("turnsRemaining");
-		final String formattedTurnsRemaining;
-
-		System.out.println(decidedSkip);
-		int turnsLeft = game.playSkip(superSkip);
-		formattedTurnsRemaining = MessageFormat.format(turnsRemainingTemplate, turnsLeft);
-		System.out.println(formattedTurnsRemaining);
-	}
-
 	private void playAlterTheFuture() {
 		final String alterFutureMessage = messages.getString("alterFutureMessage");
 		final String futureCardsMessage = messages.getString("futureCardsMessage");
@@ -1302,7 +1169,9 @@ public class GameUI implements UIInteraction {
 			if (checkIfPlayerIsCursed(player) && checkMatchingCardType(cardType,
 					CardType.EXPLODING_KITTEN)) {
 				player.removeCardFromHand(cardIndex);
-				playExplodingKitten(playerIndex);
+				CardAction action = actionFactory
+						.createAction(CardType.EXPLODING_KITTEN);
+				action.execute(game, this, playerIndex);
 				continue;
 			}
 
@@ -1313,7 +1182,9 @@ public class GameUI implements UIInteraction {
 					int explodingKittenIdx = game.getIndexOfCardFromHand
 							(playerIndex, CardType.EXPLODING_KITTEN);
 					player.removeCardFromHand(explodingKittenIdx);
-					playExplodingKitten(playerIndex);
+					CardAction action = actionFactory
+							.createAction(CardType.EXPLODING_KITTEN);
+					action.execute(game, this, playerIndex);
 					continue;
 				}
 			}
@@ -1488,6 +1359,15 @@ public class GameUI implements UIInteraction {
 				continue;
 			}
 
+			// for backwards compatibility, actionFactory is in a try
+			// catch that fails when unsupported card types encountered
+			try {
+				CardAction action = actionFactory.createAction(cardType);
+				action.execute(game, this, playerIndex);
+				continue;
+			} catch (IllegalArgumentException ignored) {
+			}
+
 			switch (cardType) {
 				case ATTACK:
 					playAttack(false);
@@ -1529,13 +1409,10 @@ public class GameUI implements UIInteraction {
 					System.out.println(newBottomCardMessage);
 					break;
 				case SHUFFLE:
-					playShuffle();
 					break;
 				case SKIP:
-					playSkip(false);
 					return;
 				case SUPER_SKIP:
-					playSkip(true);
 					return;
 				case CAT_ONE:
 					playSpecialComboTwoCards(CardType.CAT_ONE);
@@ -1705,21 +1582,20 @@ public class GameUI implements UIInteraction {
 		return indexToInsert > game.getDeck().getDeckSize();
 	}
 
-    @Override
-    public void displayMessage(String messageKey, Object... args) {
-        String pattern = messages.getString(messageKey);
-        String formatted = MessageFormat.format(pattern, args);
-        System.out.println(formatted);
-    }
+	@Override
+	public void displayMessage(String messageKey, Object... args) {
+		String pattern = messages.getString(messageKey);
+		String formatted = MessageFormat.format(pattern, args);
+		System.out.println(formatted);
+	}
 
-    @Override
-    public int getUserInputInteger() {
-        return scanner.nextInt();
-    }
+	@Override
+	public int getUserInputInteger() {
+		return scanner.nextInt();
+	}
 
-    @Override
-    public String getUserInputToken() {
-        return scanner.next();
-    }
+	@Override
+	public String getUserInputToken() {
+		return scanner.next();
+	}
 }
-
